@@ -1,0 +1,63 @@
+en un contexto de trading, que es leverage?
+En trading, leverage (apalancamiento) significa operar con dinero prestado para controlar posiciones mucho más grandes que el capital propio. Esto amplifica tanto las ganancias como las pérdidas, por lo que es una herramienta poderosa pero de alto riesgo.
+
+📌 Definición de Leverage
+Apalancamiento: Es la proporción entre el capital propio y el total de la posición que puedes controlar gracias a fondos prestados por tu bróker.
+
+Funciona como un préstamo a corto plazo: el bróker te permite abrir operaciones mayores a tu depósito inicial.
+
+Ejemplo: Si tienes $1,000 y usas un apalancamiento de 10:1, puedes controlar una posición de $10,000.
+
+⚖️ Cómo funciona
+Margen: Parte de tu capital que se reserva como garantía.
+
+Ratio de apalancamiento: Se expresa como 10:1, 50:1, 100:1, etc.
+
+Llamada de margen: Si las pérdidas superan tu depósito, el bróker exige más fondos o cierra tu posición.
+
+✅ Ventajas
+Mayor exposición: Controlas operaciones grandes con poco capital.
+
+Accesibilidad: Permite entrar en mercados como Forex, CFDs o criptomonedas con inversiones reducidas.
+
+Potencial de ganancias: Multiplica beneficios si el mercado se mueve a tu favor.
+
+⚠️ Riesgos
+Amplificación de pérdidas: Igual que las ganancias, las pérdidas se multiplican.
+
+Volatilidad extrema: En mercados como Forex o criptomonedas, el apalancamiento alto puede liquidar tu cuenta rápidamente.
+
+Gestión crítica del riesgo: Ratios altos (ej. 100:1 o 500:1) son atractivos pero peligrosos.
+
+📊 Ejemplo comparativo
+Capital inicial	Apalancamiento	Posición controlada	Impacto de un 1% de movimiento
+$1,000	1:1 (sin apalancamiento)	$1,000	±$10
+$1,000	10:1	$10,000	±$100
+$1,000	100:1	$100,000	±$1,000
+
+
+🎯 Consejos prácticos para traders en Chile
+Los brokers internacionales que operan en Chile suelen ofrecer apalancamiento entre 1:20 y 1:500.
+
+Para principiantes, se recomienda mantener ratios bajos (1:20 a 1:50) y usar stop-loss para limitar pérdidas.
+
+Considera que la CMF (Comisión para el Mercado Financiero) regula ciertos instrumentos, por lo que es clave operar con brokers autorizados.
+
+¿Quieres que te muestre ejemplos de estrategias de gestión de riesgo con apalancamiento o prefieres que comparemos brokers en Chile que ofrecen distintos niveles de leverage?
+
+si el apalancamiento es 100, què significa?
+Cuando el apalancamiento es 100 (100:1) significa que por cada 1 unidad de capital propio, el bróker te permite controlar 100 unidades en el mercado.
+
+📌 Ejemplo práctico
+Supongamos que tienes $1,000 en tu cuenta.
+
+Con apalancamiento 100:1, puedes abrir una posición de hasta $100,000.
+
+Un movimiento del mercado de apenas 1% sobre esa posición equivale a una ganancia o pérdida de $1,000, es decir, todo tu capital inicial.
+
+⚖️ Implicaciones
+Mayor exposición: Controlas un volumen enorme con poco dinero.
+
+Riesgo elevado: Un cambio mínimo en el precio puede liquidar tu cuenta.
+
+Gestión de margen: El bróker exige que mantengas un depósito mínimo (margen). Si el mercado va en tu contra, puede ejecutar una llamada de margen y cerrar tu posición.

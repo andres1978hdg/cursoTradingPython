@@ -15,6 +15,9 @@ class PlatformConnector(): # PlatformConnector() se ejecutara en cada coneccion,
         # Comprobación del tipo de cuenta
         self._live_account_warning()
 
+        # Imprimimos información de la cuenta
+        self._print_account_info()
+
         # Comprobación del trading algorítmico
         self._check_algo_trading_enabled()
 
@@ -90,4 +93,22 @@ class PlatformConnector(): # PlatformConnector() se ejecutara en cada coneccion,
                                 print(f"Símbolo {symbol} se ha añadido con éxito al MarketWatch!")
                         else:
                             print(f"El símbolo {symbol} ya estaba en el MarketWatch.")
+
+     def _print_account_info(self) -> None:
+                """
+                Prints the account information including account ID, trader name, broker, server, leverage, currency, and balance.
+                """
+                # Recuperar un objeto de tipo AccountInfo
+                account_info = mt5.account_info()._asdict()
+        
+                print(f"+------------ Información de la cuenta ------------")
+                print(f"| - ID de cuenta: {account_info['login']}")
+                print(f"| - Nombre trader: {account_info['name']}")
+                print(f"| - Broker: {account_info['company']}")
+                print(f"| - Servidor: {account_info['server']}")
+                print(f"| - Apalancamiento: {account_info['leverage']}")
+                print(f"| - Divisa de la cuenta: {account_info['currency']}")
+                print(f"| - Balance de la cuenta: {account_info['balance']}")
+                print(f"+--------------------------------------------------")
+        
     
