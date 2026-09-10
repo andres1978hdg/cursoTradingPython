@@ -103,3 +103,73 @@ class DataProvider():
                 return pd.Series()
             else:
                 return bars.iloc[-1] #iloc returns the last row of the DataFrame as a Series object
+
+        def get_latest_closed_bars(self, symbol: str, timeframe: str, num_bars: int = 1) -> pd.DataFrame:
+            """
+            Retrieves the latest closed bars for a given symbol and timeframe.
+
+            Args:
+            symbol (str): The symbol to retrieve bars for.
+            timeframe (str): The timeframe of the bars (e.g., 'M1', 'H1', 'D1').
+            num_bars (int, optional): The number of bars to retrieve. Defaults to 1.
+
+            Returns:
+            pd.DataFrame: A DataFrame containing the latest closed bars data.
+
+            Raises:
+            Exception: If the data retrieval fails.
+
+            """
+
+        # Definir los parámetros adecuados
+        tf = self._map_timeframes(timeframe)
+        from_position = 1
+        bars_count = num_bars if num_bars > 0 else 1
+
+        # Recuperamos los datos de la última vela
+        try:
+            bars_np_array = mt5.copy_rates_from_pos(symbol, tf, from_position, bars_count)
+            if bars_np_array is None:
+                print(f"El símbolo {symbol} no existe o no se han podido recuperar su datos")
+
+                # Vamos a devolver un DataFrame empty
+                return pd.DataFrame()
+
+            bars = pd.DataFrame(bars_np_array)
+
+            # Convertimos la columna time a datetime y la hacemos el índice
+            bars['time'] = pd.to_datetime(bars['time'], unit='s')
+            bars.set_index('time', inplace=True)
+
+            # Cambiamos nombres de columnas y las reorganizamos
+            bars.rename(columns={'tick_volume': 'tickvol', 'real_volume': 'vol'}, inplace=True)
+            bars = bars[['open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']]
+        
+        except Exception as e:
+            print(f"No se han podido recuperar los datos de la última vela de {symbol} {timeframe} - MT5 Error: {mt5.last_error()}, exception: {e}")
+        
+        else:
+            # Si todo OK, devolvemos el dataframe con las num_bars
+            return bars
+
+    def get_latest_tick(self, symbol: str) -> dict:
+        """
+        Retrieves the latest tick for the given symbol.
+
+        Parameters:
+        symbol (str): The symbol for which to retrieve the latest tick.
+
+        Returns:
+        dict: A dictionary containing the latest tick information.
+        """
+        try:
+            tick = mt5.symbol_info_tick(symbol)
+            if tick is None:
+                print(f" No se ha podido recuperar el último tick de {symbol} - MT5 error: {mt5.last_error()}")
+                return {}
+        
+        except Exception as e:
+            print(f"Algo no ha ido bien a la hora de recuperar el último tick de {symbol}. MT5 error: {mt5.last_error()}, exception: {e}")
+        
+        else:
+            return tick._asdict()
