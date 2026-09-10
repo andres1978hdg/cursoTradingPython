@@ -58,8 +58,48 @@ class DataProvider():
         except:
             print(f"Timeframe {timeframe} no es válido.")
 
-    
-    def get_latest_closed_bar(self, symbol: str, timeframe: str) :
-       tf = self._map_timeframes(timeframe)
-       from_position = 1
-       num_bars= 1 #ultima vela cerrada
+    def get_latest_closed_bar(self, symbol: str, timeframe: str) -> pd.Series:
+        """
+        Retrieves the latest closed bar for a given symbol and timeframe.
+
+        Args:
+            symbol (str): The symbol to retrieve the bar data for.
+            timeframe (str): The timeframe of the bars.
+
+        Returns:
+            pd.Series: The latest closed bar data as a pandas Series object.
+        """
+        
+        # Definir los parámetros adecuados
+        tf = self._map_timeframes(timeframe)
+        from_position = 1
+        num_bars = 1
+        
+        # Recuperamos los datos de la última vela
+        try:
+            bars_np_array = mt5.copy_rates_from_pos(symbol, tf, from_position, num_bars)
+            if bars_np_array is None:
+                print(f"El símbolo {symbol} no existe o no se han podido recuperar su datos")
+
+                # Vamos a devolver una Series empty
+                return pd.Series()
+
+            bars = pd.DataFrame(bars_np_array)
+
+            # Convertimos la columna time a datetime y la hacemos el índice
+            bars['time'] = pd.to_datetime(bars['time'], unit='s')
+            bars.set_index('time', inplace=True)
+
+            # Cambiamos nombres de columnas y las reorganizamos
+            bars.rename(columns={'tick_volume': 'tickvol', 'real_volume': 'vol'}, inplace=True)
+            bars = bars[['open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']]
+        
+        except Exception as e:
+            print(f"No se han podido recuperar los datos de la última vela de {symbol} {timeframe} - MT5 Error: {mt5.last_error()}, exception: {e}")
+        
+        else:
+            # Si el DF está vacío, devolvemos una serie vacía
+            if bars.empty:
+                return pd.Series()
+            else:
+                return bars.iloc[-1] #iloc returns the last row of the DataFrame as a Series object
