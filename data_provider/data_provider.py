@@ -5,14 +5,33 @@ import MetaTrader5 as mt5
 import pandas as pd
 from typing import Dict
 from datetime import datetime
-#from events.events import DataEvent
+from events.events import DataEvent
 from queue import Queue
 
 
 class DataProvider():
 
-    def __init__(self):
-        pass
+    def __init__(self, events_queue: Queue, symbol_list: list, timeframe: str):
+        """
+        Initialize the DataProvider object.
+
+        Args:
+            events_queue (Queue): The queue to store the events.
+            symbol_list (list): The list of symbols to fetch data for.
+            timeframe (str): The timeframe for the data.
+
+        Attributes:
+            events_queue (Queue): The queue to store the events.
+            symbols (list): The list of symbols to fetch data for.
+            timeframe (str): The timeframe for the data.
+            last_bar_datetime (Dict[str, datetime]): A dictionary to store the last seen datetime for each symbol.
+        """
+        self.events_queue = events_queue
+        self.symbols: list = symbol_list
+        self.timeframe: str = timeframe
+
+        # Creamos un diccionario para guardar el datetime de la última vela que habíamos visto para cada símbolo
+        self.last_bar_datetime: Dict[str, datetime] = {symbol: datetime.min for symbol in self.symbols}
 
 
     def _map_timeframes(self, timeframe: str) -> int:
@@ -166,10 +185,30 @@ class DataProvider():
             tick = mt5.symbol_info_tick(symbol)
             if tick is None:
                 print(f" No se ha podido recuperar el último tick de {symbol} - MT5 error: {mt5.last_error()}")
-                return {}
+                return {} #devuelve un diccionario vacío si no se puede recuperar el tick
         
         except Exception as e:
             print(f"Algo no ha ido bien a la hora de recuperar el último tick de {symbol}. MT5 error: {mt5.last_error()}, exception: {e}")
         
         else:
             return tick._asdict()
+
+    def check_for_new_data(self) -> None:
+        """
+        Checks for new data for each symbol and adds it to the events queue if available.
+
+        This method iterates over the symbols and checks if there is new data available for each symbol.
+        If new data is found, it updates the last retrieved bar for the symbol and adds a DataEvent to the events queue.
+
+        Returns:
+            None
+        """
+        for symbol in self.symbols:
+            latest_bar = self.get_latest_closed_bar(symbol, self.timeframe)
+
+            if latest_bar is None:
+                continue
+
+            if not latest_bar.empty and latest_bar.name > self.last_bar_datetime[symbol]: #si el timestamp obtenido (latest_bar.name es el datetime, es raro el nombre de variable pero es asi) es posterior al q habiamos guardado, es q hay datos nuevos
+                self.last_bar_datetime[symbol] = latest_bar.name
+                data_event = DataEvent(symbol=symbol, data=latest_bar)
