@@ -8,7 +8,7 @@ from trading_director.trading_director import TradingDirector
 
 if __name__ == "__main__":
         # Definición de variables necesarias para la estrategia
-    symbols = ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCLP'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
+    symbols = ['EURUSD', 'USDCLP'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
     timeframe = '1min' #el timeframe de las velas que queremos recuperar, en este caso 1min, es decir, cada vela representa 1 minuto
 
         # Creación de la cola de eventos principal

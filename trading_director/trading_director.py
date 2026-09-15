@@ -46,7 +46,9 @@ class TradingDirector():
             None
         """
         # Aquí dentro gestionamos los eventos de tipo DataEvent
-        print(f"Recibido DATA EVENT de {event.symbol} - Último precio de cierre: {event.data.close}")
+   # Aquí dentro gestionamos los eventos de tipo DataEvent
+        print(f"{event.data.name} - Recibido evento de tipo DATA para el símbolo {event.symbol} - Ultimo precio de cierre: {event.data.close}")
+       
         
 
 
