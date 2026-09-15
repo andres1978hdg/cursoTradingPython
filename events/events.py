@@ -56,6 +56,12 @@ class BaseEvent(BaseModel):
     """
     event_type: EventType #O sea, ya que estamos usando BaseModel de pydantic, en tiempo de ejecucion va a validar que el tipo de evento sea uno de los definidos en EventType
 
+    class Config:
+        """
+        Configuration class for Pydantic BaseModel.
+        """
+        arbitrary_types_allowed = True  # Esto permite que se puedan usar tipos arbitrarios en los modelos de Pydantic, como por ejemplo pd.Series, que no es un tipo nativo de Python.
+
 class DataEvent(BaseEvent):
     """
     Represents an event that contains data for a specific symbol.

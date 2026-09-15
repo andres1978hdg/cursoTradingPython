@@ -1,6 +1,9 @@
 from data_provider.data_provider import DataProvider
 import queue
 import time
+from typing import Dict, Callable
+
+from events.events import DataEvent
 
 
 class TradingDirector():
@@ -25,6 +28,27 @@ class TradingDirector():
 
          # Controlador de trading
         self.continue_trading: bool = True
+
+     # Creación del event handler
+        self.event_handler: Dict[str, Callable] = {
+            "DATA": self._handle_data_event
+            #, "SIGNAL": self._handle_signal_event,
+        }
+
+    def _handle_data_event(self, event: DataEvent):
+        """
+        Handle the data event.
+
+        Args:
+            event (DataEvent): The data event object.
+
+        Returns:
+            None
+        """
+        # Aquí dentro gestionamos los eventos de tipo DataEvent
+        print(f"Recibido DATA EVENT de {event.symbol} - Último precio de cierre: {event.data.close}")
+        
+
 
     def execute(self) -> None:
         """
@@ -52,4 +76,10 @@ class TradingDirector():
 
             else:
                 if event is not None:
-                    pass
+                  handler = self.event_handler.get(event.event_type) #esto euivale al  "DATA": self._handle_data_event de mas arriba
+                  handler(event)
+                else:
+                    self.continue_trading = False
+                    print("Error: Se ha recibido un evento None, lo que indica que se ha decidido detener el programa.")
+
+                time.sleep(0.1) #para no saturar la CPU, hacemos una pausa de 0.1 segundos antes de volver a comprobar la cola de eventos

@@ -212,3 +212,4 @@ class DataProvider():
             if not latest_bar.empty and latest_bar.name > self.last_bar_datetime[symbol]: #si el timestamp obtenido (latest_bar.name es el datetime, es raro el nombre de variable pero es asi) es posterior al q habiamos guardado, es q hay datos nuevos
                 self.last_bar_datetime[symbol] = latest_bar.name
                 data_event = DataEvent(symbol=symbol, data=latest_bar)
+                self.events_queue.put(data_event)

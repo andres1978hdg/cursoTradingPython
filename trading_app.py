@@ -3,6 +3,7 @@
 from platform_connector.platform_connector import PlatformConnector
 from data_provider.data_provider import DataProvider
 from queue import Queue
+from trading_director.trading_director import TradingDirector
 
 
 if __name__ == "__main__":
@@ -16,4 +17,11 @@ if __name__ == "__main__":
 
     CONNECT = PlatformConnector(symbol_list=symbols) #instanciamos la clase PlatformConnector, que se encargara de inicializar la plataforma y añadir los simbolos al MarketWatch
     DATA_PROVIDER = DataProvider(events_queue=events_queue, symbol_list=symbols, timeframe=timeframe)
+
+    
+    # Creación del trading director y ejecución del método principal
+    TRADING_DIRECTOR = TradingDirector(events_queue=events_queue,
+                                        data_provider=DATA_PROVIDER)
+    
+    TRADING_DIRECTOR.execute()
    
