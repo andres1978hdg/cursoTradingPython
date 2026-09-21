@@ -50,6 +50,21 @@ print(item.price)  # 99.99 (es un float)
 print(item.model_dump())  # {'name': 'Teclado', 'price': 99.99, 'in_stock': True}
     """
 
+class SignalType(str, Enum):
+    """
+    Represents the type of a trading signal.
+    """
+    BUY = "BUY"
+    SELL = "SELL"
+
+class OrderType(str, Enum):
+    """
+    Represents the type of an order.
+    """
+    MARKET = "MARKET" #orden de mercado, es decir, se ejecuta al precio actual del mercado
+    LIMIT = "LIMIT" #orden limitada, es decir, se ejecuta a un precio determinado o mejor (por ejemplo, si queremos comprar EURUSD a 1.1000, ponemos una orden limitada a 1.1000 y si el precio baja a 1.1000 o menos, se ejecuta la orden)
+    STOP = "STOP" #orden stop, es decir, se ejecuta a un precio determinado o peor (por ejemplo, si queremos vender EURUSD a 1.1000, ponemos una orden stop a 1.1000 y si el precio sube a 1.1000 o más, se ejecuta la orden)
+
 class BaseEvent(BaseModel):
     """
     Base class for all events.
@@ -74,3 +89,26 @@ class DataEvent(BaseEvent):
     event_type: EventType = EventType.DATA #esto es fijo
     symbol: str #esto se define al instanciar la clase, es decir, cuando creemos un DataEvent, le pasaremos el simbolo
     data: pd.Series #esto se define al instanciar la clase, es decir, cuando creemos un DataEvent, le pasaremos la serie de datos (una fila del dataframe de velas)
+
+class SignalEvent(BaseEvent):
+    """
+    Represents a signal event in the trading system.
+
+    Attributes:
+        event_type (EventType): The type of the event.
+        symbol (str): The symbol associated with the signal.
+        signal (SignalType): The type of signal.
+        target_order (OrderType): The type of order to be placed.
+        target_price (float): The target price for the order.
+        magic_number (int): The magic number associated with the signal.
+        sl (float): The stop loss level for the order.
+        tp (float): The take profit level for the order.
+    """
+    event_type: EventType = EventType.SIGNAL
+    symbol: str
+    signal: SignalType
+    target_order: OrderType
+    target_price: float # Precio objetivo para la orden, es decir, el precio al que queremos ejecutar la orden, asociado al tipo de orden (limit, stop, pero no market, ya que market se ejecuta al precio actual del mercado)
+    magic_number: int # Número mágico o identificador asociado a la señal, que se utiliza para identificar y gestionar órdenes y posiciones de manera única en la plataforma de trading. Este número permite diferenciar entre distintas estrategias o sistemas de trading que puedan estar operando simultáneamente en la misma cuenta, evitando conflictos y facilitando el seguimiento de cada operación individualmente.
+    sl: float # Nivel de stop loss para la orden, es decir, el precio al que queremos cerrar la orden si va en nuestra contra, para limitar las pérdidas
+    tp: float # Nivel de take profit para la orden, es decir, el precio al que queremos cerrar la orden si va a nuestro favor, para asegurar las ganancias
