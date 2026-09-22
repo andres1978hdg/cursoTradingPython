@@ -123,7 +123,7 @@ class DataProvider():
             else:
                 return bars.iloc[-1] #iloc returns the last row of the DataFrame as a Series object
 
-        def get_latest_closed_bars(self, symbol: str, timeframe: str, num_bars: int = 1) -> pd.DataFrame:
+    def get_latest_closed_bars(self, symbol: str, timeframe: str, num_bars: int = 1) -> pd.DataFrame:
             """
             Retrieves the latest closed bars for a given symbol and timeframe.
 
@@ -141,35 +141,35 @@ class DataProvider():
             """
 
         # Definir los parámetros adecuados
-        tf = self._map_timeframes(timeframe)
-        from_position = 1
-        bars_count = num_bars if num_bars > 0 else 1
+            tf = self._map_timeframes(timeframe)
+            from_position = 1
+            bars_count = num_bars if num_bars > 0 else 1
 
         # Recuperamos los datos de la última vela
-        try:
-            bars_np_array = mt5.copy_rates_from_pos(symbol, tf, from_position, bars_count)
-            if bars_np_array is None:
-                print(f"El símbolo {symbol} no existe o no se han podido recuperar su datos")
+            try:
+                bars_np_array = mt5.copy_rates_from_pos(symbol, tf, from_position, bars_count)
+                if bars_np_array is None:
+                    print(f"El símbolo {symbol} no existe o no se han podido recuperar su datos")
 
                 # Vamos a devolver un DataFrame empty
-                return pd.DataFrame()
+                    return pd.DataFrame()
 
-            bars = pd.DataFrame(bars_np_array)
+                bars = pd.DataFrame(bars_np_array)
 
             # Convertimos la columna time a datetime y la hacemos el índice
-            bars['time'] = pd.to_datetime(bars['time'], unit='s')
-            bars.set_index('time', inplace=True)
+                bars['time'] = pd.to_datetime(bars['time'], unit='s')
+                bars.set_index('time', inplace=True)
 
             # Cambiamos nombres de columnas y las reorganizamos
-            bars.rename(columns={'tick_volume': 'tickvol', 'real_volume': 'vol'}, inplace=True)
-            bars = bars[['open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']]
+                bars.rename(columns={'tick_volume': 'tickvol', 'real_volume': 'vol'}, inplace=True)
+                bars = bars[['open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']]
         
-        except Exception as e:
-            print(f"No se han podido recuperar los datos de la última vela de {symbol} {timeframe} - MT5 Error: {mt5.last_error()}, exception: {e}")
+            except Exception as e:
+                print(f"No se han podido recuperar los datos de la última vela de {symbol} {timeframe} - MT5 Error: {mt5.last_error()}, exception: {e}")
         
-        else:
+            else:
             # Si todo OK, devolvemos el dataframe con las num_bars
-            return bars
+                return bars
 
     def get_latest_tick(self, symbol: str) -> dict:
         """

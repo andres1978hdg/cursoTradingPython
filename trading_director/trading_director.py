@@ -1,14 +1,15 @@
 from data_provider.data_provider import DataProvider
+from signal_generator.interfaces.signal_generator_interface import ISignalGenerator
 import queue
 import time
 from typing import Dict, Callable
 
-from events.events import DataEvent
+from events.events import DataEvent, SignalEvent
 
 
 class TradingDirector():
     
-    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider):
+    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator):
         """
         Initializes the TradingDirector object.
 
@@ -26,13 +27,15 @@ class TradingDirector():
         # Referencia de los distintos módulos
         self.DATA_PROVIDER = data_provider
 
+        self.SIGNAL_GENERATOR = signal_generator
+
          # Controlador de trading
         self.continue_trading: bool = True
 
      # Creación del event handler
         self.event_handler: Dict[str, Callable] = {
-            "DATA": self._handle_data_event
-            #, "SIGNAL": self._handle_signal_event,
+            "DATA": self._handle_data_event,
+            "SIGNAL": self._handle_signal_event
         }
 
     def _handle_data_event(self, event: DataEvent):
@@ -48,8 +51,21 @@ class TradingDirector():
         # Aquí dentro gestionamos los eventos de tipo DataEvent
    # Aquí dentro gestionamos los eventos de tipo DataEvent
         print(f"{event.data.name} - Recibido evento de tipo DATA para el símbolo {event.symbol} - Ultimo precio de cierre: {event.data.close}")
+        self.SIGNAL_GENERATOR.generate_signal(event) # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
        
-        
+    def _handle_signal_event(self, event: SignalEvent):
+        """
+        Handle the signal event.
+
+        Args:
+            event (SignalEvent): The signal event object.
+
+        Returns:
+            None
+        """
+        # Procesamos el signal event
+        print(f"Recibido SIGNAL EVENT {event.signal} para {event.symbol}")
+       
 
 
     def execute(self) -> None:
