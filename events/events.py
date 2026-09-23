@@ -112,3 +112,28 @@ class SignalEvent(BaseEvent):
     magic_number: int # Número mágico o identificador asociado a la señal, que se utiliza para identificar y gestionar órdenes y posiciones de manera única en la plataforma de trading. Este número permite diferenciar entre distintas estrategias o sistemas de trading que puedan estar operando simultáneamente en la misma cuenta, evitando conflictos y facilitando el seguimiento de cada operación individualmente.
     sl: float # Nivel de stop loss para la orden, es decir, el precio al que queremos cerrar la orden si va en nuestra contra, para limitar las pérdidas
     tp: float # Nivel de take profit para la orden, es decir, el precio al que queremos cerrar la orden si va a nuestro favor, para asegurar las ganancias
+
+class SizingEvent(BaseEvent):
+    """
+    Represents a sizing event.
+
+    Attributes:
+        event_type (EventType): The type of the event.
+        symbol (str): The symbol associated with the event.
+        signal (SignalType): The signal type of the event.
+        target_order (OrderType): The target order type of the event.
+        target_price (float): The target price of the event.
+        magic_number (int): The magic number associated with the event.
+        sl (float): The stop loss value of the event.
+        tp (float): The take profit value of the event.
+        volume (float): The volume of the event.
+    """
+    event_type: EventType = EventType.SIZING
+    symbol: str
+    signal: SignalType
+    target_order: OrderType
+    target_price: float # PRECIO AL QUE QUIERO ENTRAR, ASOCIADO A LIMIT O STOP EN ORDERTYPE (PERO NO EN MARKET QUE ES EL PRECIO ACTUAL)
+    magic_number: int
+    sl: float
+    tp: float
+    volume: float
