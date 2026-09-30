@@ -43,7 +43,8 @@ class TradingDirector():
             "SIZING": self._handle_sizing_event
         }
 
-    def _handle_data_event(self, event: DataEvent):
+    # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
+    def _handle_data_event(self, event: DataEvent): 
         """
         Handle the data event.
 
@@ -55,8 +56,9 @@ class TradingDirector():
         """
         # Aquí dentro gestionamos los eventos de tipo DataEvent
         print(f"{event.data.name} - Recibido evento de tipo DATA para el símbolo {event.symbol} - Ultimo precio de cierre: {event.data.close}")
-        self.SIGNAL_GENERATOR.generate_signal(event) # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
-       
+        self.SIGNAL_GENERATOR.generate_signal(event) 
+
+    # Aca consumimos el evento de tipo SignalEvent, y generamos un evento de tipo SizingEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
     def _handle_signal_event(self, event: SignalEvent):
         """
         Handle the signal event.
@@ -69,7 +71,7 @@ class TradingDirector():
         """
         # Procesamos el signal event
         print(f"Recibido SIGNAL EVENT {event.signal} para {event.symbol}")
-        self.SIGNAL_GENERATOR.generate_signal(event) # aca consumimos el evento de tipo SignalEvent, y generamos un evento de tipo SizingEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
+        self.POSITION_SIZER.size_signal(event)
 
     def _handle_sizing_event(self, event: SizingEvent):
         """
