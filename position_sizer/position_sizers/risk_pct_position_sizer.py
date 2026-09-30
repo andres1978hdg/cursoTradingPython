@@ -2,6 +2,7 @@
 
 from data_provider.data_provider import DataProvider
 from events.events import SignalEvent
+from utils.utils import Utils
 from ..interfaces.position_sizer_interface import IPositionSizer
 from ..properties.position_sizer_properties import RiskPctSizingProps
 import MetaTrader5 as mt5
@@ -46,19 +47,21 @@ class RiskPctPositionSizer(IPositionSizer):
         # Conseguimos los valores que nos faltan para los cálculos
         equity = account_info.equity #dijo q se puede calcular con el balance tambien, pero el equity es mejor porque tiene en cuenta las posiciones abiertas y el balance no. El equity es el valor total de la cuenta, incluyendo el balance y las ganancias o pérdidas no realizadas de las posiciones abiertas.
         volume_step = symbol_info.volume_step               # Cambio mínimo de volumen. Por ejemplo, si el volume step es 0.01, significa que podemos abrir posiciones de 0.01 lotes, 0.02 lotes, 0.03 lotes, etc., pero no podemos abrir posiciones de 0.015 lotes o 0.025 lotes.
-        tick_size = symbol_info.trade_tick_size             # Cambio mínimo de precio, que es lo mismo q el tamaño del tick, es decir, la mínima variación de precio que tiene un símbolo en el mercado para justamente generar un nuevo tick. Por ejemplo, si el tick size es 0.0001, significa que el precio del símbolo puede variar en incrementos de 0.0001 unidades de su divisa base.
+        # el tick_size lo establece el broker y es fijo. En el par EURUSD supongamos que tenemos un tick_size de 0.00001 USD/EUR (notar q se intercambia el orden de las divisas del par). Esto significa q por cada tick (o sea por cada paso) tendremos q 1 EUR aumentara 0.00001 USD o disminuira 0.00001 USD segun las condiciones de mercado. Cuando 1 Euro aumente o disminuya 
+        #0.0000099 aun no generara un tick pero si generara un tick cuando llegue a 0.00001
+        #
+        tick_size = symbol_info.trade_tick_size            
         account_ccy = account_info.currency                 # divisa de la cuenta
         #Esto me lo dijo gemini: DIVISABASE/DIVISACOTIZADA (o sea EUR/USD que es lo mismo que EURUSD). DIVISABASE = ACTIVO QUE ESTAS COMPRANDO O VENDIENDO. DIVISACOTIZADA = LA MONEDA CON LA QUE PAGAS O COBRAS (LLAMADA TAMBIEN DIVISA DE PROFIT EN EL CURSO)
         symbol_profit_ccy = symbol_info.currency_profit     # divisa del profit del símbolo. Por ejemplo, si estamos operando con el símbolo EURUSD, la divisa de profit es USD, porque las ganancias o pérdidas se calculan en dólares estadounidenses. Si estamos operando con el símbolo USDJPY, la divisa de profit es JPY, porque las ganancias o pérdidas se calculan en yenes japoneses.
-        contract_size = symbol_info.trade_contract_size     # tamaño del contrato (ej 1 lote estándar valdra 100.000 unidades de la divisa base del símbolo, es decir, si estamos operando con el símbolo EURUSD, 1 lote estándar valdrá 100.000 euros; si estamos operando con el símbolo USDJPY, 1 lote estándar valdrá 90.000 dólares estadounidenses por ejemplo). Esto es importante porque el tamaño del contrato afecta directamente al valor del tick y al riesgo monetario de la operación. Para cada divisa el contract_size es diferente.
+        contract_size = symbol_info.trade_contract_size     # tamaño de 1 lote definido por el broker para cada currency (ej 1 lote estándar valdra 100.000 unidades de la divisa base del símbolo, es decir, si estamos operando con el símbolo EURUSD, 1 lote estándar valdrá 100.000 euros; si estamos operando con el símbolo USDJPY, 1 lote estándar valdrá 90.000 dólares estadounidenses por ejemplo). Esto es importante porque el tamaño del contrato afecta directamente al valor del tick y al riesgo monetario de la operación. Para cada divisa el contract_size es diferente.
         
 
         # Cálculos auxiliares
         tick_value_profit_ccy = contract_size * tick_size              # Cantidad ganada o perdida por cada lote y por cada tick
 
         # Convertick el tick value en profit ccy del symbol a la divisa de nuestra cuenta. Para el caso de EURUSD, la divisa de profit es USD. Para el caso de USDEUR la divisa de profit es EUR y la divisa de nuestra cuenta sera por ejemplo CLP  
-        # tick_value_account_ccy = Utils.convert_currency_amount_to_another_currency(tick_value_profit_ccy, symbol_profit_ccy, account_ccy)
-        tick_value_account_ccy= 5
+        tick_value_account_ccy = Utils.convert_currency_amount_to_another_currency(tick_value_profit_ccy, symbol_profit_ccy, account_ccy)
         
         # Cálculo del tamaño de la posición
         try:

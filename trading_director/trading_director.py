@@ -1,15 +1,16 @@
 from data_provider.data_provider import DataProvider
 from signal_generator.interfaces.signal_generator_interface import ISignalGenerator
+from position_sizer.position_sizer import PositionSizer
 import queue
 import time
 from typing import Dict, Callable
 
-from events.events import DataEvent, SignalEvent
+from events.events import DataEvent, SignalEvent, SizingEvent
 
 
 class TradingDirector():
     
-    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator):
+    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator, position_sizer: PositionSizer):
         """
         Initializes the TradingDirector object.
 
@@ -29,13 +30,17 @@ class TradingDirector():
 
         self.SIGNAL_GENERATOR = signal_generator
 
+        self.POSITION_SIZER = position_sizer
+
+
          # Controlador de trading
         self.continue_trading: bool = True
 
      # Creación del event handler
         self.event_handler: Dict[str, Callable] = {
             "DATA": self._handle_data_event,
-            "SIGNAL": self._handle_signal_event
+            "SIGNAL": self._handle_signal_event,
+            "SIZING": self._handle_sizing_event
         }
 
     def _handle_data_event(self, event: DataEvent):
@@ -49,7 +54,6 @@ class TradingDirector():
             None
         """
         # Aquí dentro gestionamos los eventos de tipo DataEvent
-   # Aquí dentro gestionamos los eventos de tipo DataEvent
         print(f"{event.data.name} - Recibido evento de tipo DATA para el símbolo {event.symbol} - Ultimo precio de cierre: {event.data.close}")
         self.SIGNAL_GENERATOR.generate_signal(event) # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
        
@@ -65,6 +69,20 @@ class TradingDirector():
         """
         # Procesamos el signal event
         print(f"Recibido SIGNAL EVENT {event.signal} para {event.symbol}")
+        self.SIGNAL_GENERATOR.generate_signal(event) # aca consumimos el evento de tipo SignalEvent, y generamos un evento de tipo SizingEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
+
+    def _handle_sizing_event(self, event: SizingEvent):
+        """
+        Handle the sizing event.
+
+        Args:
+            event (SizingEvent): The sizing event object.
+
+        Returns:
+            None
+        """
+        print(f"Recibido SIZING EVENT con volumen {event.volume} para {event.signal} en {event.symbol}")
+        #self.RISK_MANAGER.assess_order(event)
        
 
 
