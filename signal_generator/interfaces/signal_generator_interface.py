@@ -1,6 +1,6 @@
 # QUANTDEMY - https://quantdemy.com - Trading con Python y MetaTrader 5: Crea tu Propio Framework
 
-from typing import Protocol
+from typing import Protocol #Protocol es una clase base que permite definir interfaces en Python. Una interfaz es un conjunto de métodos que una clase debe implementar, pero no proporciona ninguna implementación concreta. Al usar Protocol, podemos definir qué métodos y atributos se esperan en una clase sin tener que proporcionar una implementación específica. Esto es útil para garantizar que las clases que implementan la interfaz cumplan con ciertos requisitos y puedan ser utilizadas de manera intercambiable en el código.
 from events.events import DataEvent, SignalEvent
 from data_provider.data_provider import DataProvider
 #from portfolio.portfolio import Portfolio

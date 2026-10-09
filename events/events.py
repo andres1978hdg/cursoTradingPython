@@ -137,3 +137,28 @@ class SizingEvent(BaseEvent):
     sl: float
     tp: float
     volume: float
+
+class OrderEvent(BaseEvent):
+    """
+    Represents an order event.
+
+    Attributes:
+        event_type (EventType): The type of the event.
+        symbol (str): The symbol of the order.
+        signal (SignalType): The signal type of the order.
+        target_order (OrderType): The target order type.
+        target_price (float): The target price of the order.
+        magic_number (int): The magic number associated with the order.
+        sl (float): The stop loss level of the order.
+        tp (float): The take profit level of the order.
+        volume (float): The volume of the order.
+    """
+    event_type: EventType = EventType.ORDER
+    symbol: str
+    signal: SignalType
+    target_order: OrderType
+    target_price: float
+    magic_number: int
+    sl: float
+    tp: float
+    volume: float # va a ser 0 en el caso q el risk manager diga q el OrderEvent no procede.
