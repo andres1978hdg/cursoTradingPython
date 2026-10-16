@@ -8,11 +8,13 @@ from trading_director.trading_director import TradingDirector
 from signal_generator.signals.signal_ma_crossover import SignalMACrossover
 from position_sizer.position_sizer import PositionSizer
 from position_sizer.properties.position_sizer_properties import MinSizingProps, FixedSizingProps, RiskPctSizingProps
+from risk_manager.risk_manager import RiskManager
+from risk_manager.properties.risk_manager_properties import MaxLeverageFactorRiskProps
 
 
 if __name__ == "__main__":
         # Definición de variables necesarias para la estrategia
-    symbols = ['EURUSD', 'USDCLP'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
+    symbols = ['EURUSD']#['EURUSD', 'USDCLP'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
     timeframe = '1min' #el timeframe de las velas que queremos recuperar, en este caso 1min, es decir, cada vela representa 1 minuto
     magic_number=12345 # el numero q le pasamos al bot en pepperstone.
     slow_ma_period = 20 #periodo de la media movil lenta, es decir, el numero de velas que se van a promediar para calcular la media movil lenta
@@ -36,13 +38,19 @@ if __name__ == "__main__":
 
     POSITION_SIZER = PositionSizer(events_queue=events_queue,
                                     data_provider=DATA_PROVIDER,
-                                    sizing_properties=FixedSizingProps(volume=0.05))
+                                    sizing_properties=FixedSizingProps(volume=0.09))
+
+    RISK_MANAGER = RiskManager(events_queue=events_queue,
+                                data_provider=DATA_PROVIDER,
+                                portfolio=PORTFOLIO,
+                                risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5.0))
     
     # Creación del trading director y ejecución del método principal
     TRADING_DIRECTOR = TradingDirector(events_queue=events_queue,
                                         data_provider=DATA_PROVIDER,
                                         signal_generator=SIGNAL_GENERATOR,   
-                                        position_sizer=POSITION_SIZER)
+                                        position_sizer=POSITION_SIZER,
+                                        risk_manager=RISK_MANAGER)
     
     TRADING_DIRECTOR.execute()
    

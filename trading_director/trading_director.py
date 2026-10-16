@@ -1,16 +1,18 @@
 from data_provider.data_provider import DataProvider
 from signal_generator.interfaces.signal_generator_interface import ISignalGenerator
 from position_sizer.position_sizer import PositionSizer
+from risk_manager.risk_manager import RiskManager
 import queue
 import time
 from typing import Dict, Callable
 
-from events.events import DataEvent, SignalEvent, SizingEvent
+from events.events import DataEvent, OrderEvent, SignalEvent, SizingEvent
 
 
 class TradingDirector():
     
-    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator, position_sizer: PositionSizer):
+    def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator, 
+                 position_sizer: PositionSizer, risk_manager: RiskManager):
         """
         Initializes the TradingDirector object.
 
@@ -32,6 +34,8 @@ class TradingDirector():
 
         self.POSITION_SIZER = position_sizer
 
+        self.RISK_MANAGER = risk_manager
+
 
          # Controlador de trading
         self.continue_trading: bool = True
@@ -40,7 +44,8 @@ class TradingDirector():
         self.event_handler: Dict[str, Callable] = {
             "DATA": self._handle_data_event,
             "SIGNAL": self._handle_signal_event,
-            "SIZING": self._handle_sizing_event
+            "SIZING": self._handle_sizing_event,
+            "ORDER": self._handle_order_event
         }
 
     # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
@@ -73,6 +78,7 @@ class TradingDirector():
         print(f"Recibido SIGNAL EVENT {event.signal} para {event.symbol}")
         self.POSITION_SIZER.size_signal(event)
 
+    # Aca consumimos el evento de tipo SizingEvent, y generamos un evento de tipo OrderEvent que es el q corresponde al modulo manager,
     def _handle_sizing_event(self, event: SizingEvent):
         """
         Handle the sizing event.
@@ -84,9 +90,21 @@ class TradingDirector():
             None
         """
         print(f"Recibido SIZING EVENT con volumen {event.volume} para {event.signal} en {event.symbol}")
-        #self.RISK_MANAGER.assess_order(event)
+        self.RISK_MANAGER.assess_order(event)
        
+ # Aca consumimos el evento de tipo OrderEvent que es el q corresponde al modulo manager, y generamos un evento de tipo 
+    def _handle_order_event(self, event: OrderEvent):
+        """
+        Handle the order event.
 
+        Args:
+            event (OrderEvent): The order event object.
+
+        Returns:
+            None
+        """
+        print(f" Recibido ORDER EVENT con volumen {event.volume} para {event.signal} en {event.symbol}")
+        #self.ORDER_EXECUTOR.execute_order(event)
 
     def execute(self) -> None:
         """

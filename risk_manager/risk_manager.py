@@ -10,6 +10,9 @@ from utils.utils import Utils
 from queue import Queue
 import MetaTrader5 as mt5
 
+
+#La idea de esta clase es si ya tenemos las posiciones abiertas A, B y C con valores va, vb y vc respectivamente y queremos establecer un nuevo valor solo para la posicion A vna, saber si el valor total
+#va + vna + vb + vc cumple con el requerimiento de que sea menor que el maximo valor de apalancamiento establecido por el broker.
 class RiskManager(IRiskManager):
     
     def __init__(self, events_queue: Queue, data_provider: DataProvider, portfolio: Portfolio, risk_properties: BaseRiskProps):
@@ -31,7 +34,7 @@ class RiskManager(IRiskManager):
         
         self.risk_management_method = self._get_risk_management_method(risk_properties)
     
-    def _get_risk_management_method(self, risk_props: BaseRiskProps) -> IRiskManager: 
+    def _get_risk_management_method(self, risk_props: BaseRiskProps) -> IRiskManager: # el "self" en un metodo privado no es necesario, pero lo pongo para mantener la consistencia con el resto de los metodos privados de la clase
         """
         Returns the appropriate risk management method based on the given risk properties.
 
@@ -50,6 +53,8 @@ class RiskManager(IRiskManager):
         else:
             raise Exception(f"ERROR: Método de Risk Mgmt desconocido: {risk_props}")
 
+
+       #Este metodo es para calcular el valor de todas las posiciones que ya tenemos abiertas
     def _compute_current_value_of_positions_in_account_currency(self) -> float:
         """
         Computes the current value of positions in the account currency.
@@ -61,13 +66,14 @@ class RiskManager(IRiskManager):
         # Recopilamos las posiciones abiertas por nuestra estrategia
         current_positions = self.PORTFOLIO.get_strategy_open_positions()
 
-        # Vamos a calcular el valor de las posiciones abiertas
+        # Vamos a calcular el valor de todas las posiciones abiertas
         total_value = 0.0
         for position in current_positions:
-            total_value += self._compute_value_of_position_in_account_currency(position.symbol, position.volume, position.type)
+            total_value += self._compute_value_of_position_in_account_currency(position.symbol, position.volume, position.type) #este es el valore de todas las posiciones abiertas q tenemos en total
         
         return total_value
 
+    #Este metodo es para calcular el valor de una posicion que ya tenemos abierta
     def _compute_value_of_position_in_account_currency(self, symbol: str, volume: float, position_type: int) -> float:
         """
         Computes the value of a position in the account currency.
@@ -82,7 +88,7 @@ class RiskManager(IRiskManager):
         """
         symbol_info = mt5.symbol_info(symbol)
 
-        # Unidades operadas en las unidades del symbol: (cantidad de moneda base, barriles de petroleo, onzas de oro)
+        # Unidades operadas en las unidades del symbol: (en cantidad de moneda base (o sea lo q queremos comprar o vender) como por ej. barriles de petroleo, onzas de oro)
         traded_units = volume * symbol_info.trade_contract_size
 
         # Valor de las unidades operadas en la divisa cotizada del símbolo (USD para el oro, USD para el petróleo, CHF para el GBPCHF, EUR para el DAX)
@@ -92,9 +98,9 @@ class RiskManager(IRiskManager):
         value_traded_in_account_ccy = Utils.convert_currency_amount_to_another_currency(value_traded_in_profit_ccy, symbol_info.currency_profit, mt5.account_info().currency)
 
         if position_type == mt5.ORDER_TYPE_SELL:
-            return -value_traded_in_account_ccy
+            return -value_traded_in_account_ccy # debemos devolver negativo si la orden es de venta
         else:
-            return value_traded_in_account_ccy
+            return value_traded_in_account_ccy # debemos devolver positivo si la orden es de compra
 
     def _create_and_put_order_event(self, sizing_event: SizingEvent, volume: float) -> None:
         """
@@ -119,7 +125,9 @@ class RiskManager(IRiskManager):
 
         # Colocamos el order event a la cola de eventos
         self.events_queue.put(order_event)
-    
+
+    # el "self" lo uso para llamar a los metodos privados de la clase, y para mantener la consistencia con el resto de los metodos de la clase
+    #Este metodo es para evaluar si el nuevo valor (para una posicion que ya teniamos abierta) cumple o no los requisitos que hemos establecido, o sea si es menor al maximo valor de apalancamiento establecido por el broker.
     def assess_order(self, sizing_event: SizingEvent) -> None: #metodo equivalente a size_signal del modulo position_sizer. Este es el assess_order de la interfaz
         """
         Assess the order based on the risk management method and create an order event if the new volume is greater than 0.

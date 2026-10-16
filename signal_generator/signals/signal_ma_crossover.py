@@ -9,7 +9,7 @@ class SignalMACrossover(ISignalGenerator):
     def __init__(self, events_queue: Queue, data_provider: DataProvider, portfolio: Portfolio, timeframe: str, fast_period: int, slow_period: int):
        self.events_queue = events_queue
        self.data_provider = data_provider   
-       self.portfolio = portfolio
+       self.PORTFOLIO = portfolio
        self.timeframe = timeframe
        self.fast_period = fast_period if fast_period > 1 else 2 # Aseguramos que el periodo rápido sea al menos 2
        self.slow_period = slow_period if slow_period >2 else 3 # Aseguramos que el periodo lento sea al menos 3, y mayor que el periodo rápido
@@ -30,7 +30,7 @@ class SignalMACrossover(ISignalGenerator):
         #Ponemos en la cola de eventos el evento de señal generado, para que sea procesado por el resto del sistema
         self.events_queue.put(signal_event)
 
-    def generate_signal(self, data_event: DataEvent, portfolio: Portfolio) ->  None:
+    def generate_signal(self, data_event: DataEvent) ->  None:
 
         # Cogemos el símbolo del evento
         symbol = data_event.symbol
@@ -39,7 +39,7 @@ class SignalMACrossover(ISignalGenerator):
         bars = self.data_provider.get_latest_closed_bars(symbol, self.timeframe, self.slow_period)
 
         # Recuperamos las posiciones abiertas por esta estrategia en el símbolo donde hemos tenido el Data Event
-        open_positions = portfolio.get_number_of_strategy_open_positions_by_symbol(symbol)
+        open_positions = self.PORTFOLIO.get_number_of_strategy_open_positions_by_symbol(symbol)
 
         #Calculamos el valor de los indicadores. Seguimos la filosofìa de Trend Following, no la de Mean Reversion
         fast_ma = bars['close'][self.fast_period:].mean() #media movil rapida, que es el precio de cierre de unas pocas velas (de cinco velas por ejemplo) en un periodo de tiempo determinado (por ejemplo, 1 minuto, 5 minutos, 1 hora, etc.)
@@ -63,6 +63,6 @@ class SignalMACrossover(ISignalGenerator):
                                               signal=signal,
                                               target_order="MARKET", #orden de mercado, es decir, se ejecuta al precio actual del mercado, tal como esta definido en la clase OrderType de events.py
                                               target_price=0.0, #el precio objetivo para target_order="MARKET" no es relevante, ya que se ejecuta al precio actual del mercado
-                                              magic_number=self.portfolio.magic, #un numero magico cualquiera, que se puede usar para identificar la estrategia que genero la señal
+                                              magic_number=self.PORTFOLIO.magic, #un numero magico cualquiera, que se puede usar para identificar la estrategia que genero la señal
                                               sl=0.0, #el nivel de stop loss para target_order="MARKET" no es relevante, ya que se ejecuta al precio actual del mercado
                                               tp=0.0) #el nivel de take profit para target_order="MARKET" no es relevante, ya que se ejecuta al precio actual del mercado
