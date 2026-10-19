@@ -62,8 +62,8 @@ class OrderType(str, Enum):
     Represents the type of an order.
     """
     MARKET = "MARKET" #orden de mercado, es decir, se ejecuta al precio actual del mercado
-    LIMIT = "LIMIT" #orden limitada, es decir, se ejecuta a un precio determinado o mejor (por ejemplo, si queremos comprar EURUSD a 1.1000, ponemos una orden limitada a 1.1000 y si el precio baja a 1.1000 o menos, se ejecuta la orden)
-    STOP = "STOP" #orden stop, es decir, se ejecuta a un precio determinado o peor (por ejemplo, si queremos vender EURUSD a 1.1000, ponemos una orden stop a 1.1000 y si el precio sube a 1.1000 o más, se ejecuta la orden)
+    LIMIT = "LIMIT" #orden limitada, es decir, se ejecuta a un precio determinado o mejor (por ejemplo, si queremos comprar EURUSD a 1.1000, ponemos una orden limitada a 1.1000 y si el precio baja a 1.1000 o menos, se ejecuta la orden). Me imagino que esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
+    STOP = "STOP" #orden stop, es decir, se ejecuta a un precio determinado o peor (por ejemplo, si queremos vender EURUSD a 1.1000, ponemos una orden stop a 1.1000 y si el precio sube a 1.1000 o más, se ejecuta la orden). Me imagino que esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
 
 class BaseEvent(BaseModel):
     """
@@ -162,3 +162,22 @@ class OrderEvent(BaseEvent):
     sl: float
     tp: float
     volume: float # va a ser 0 en el caso q el risk manager diga q el OrderEvent no procede.
+
+class ExecutionEvent(BaseEvent):
+    """
+    Represents an execution event that occurs when a trade is executed.
+
+    Attributes:
+        event_type (EventType): The type of the event (EXECUTION).
+        symbol (str): The symbol of the executed trade.
+        signal (SignalType): The type of signal that triggered the execution.
+        fill_price (float): The price at which the trade was executed.
+        fill_time (datetime): The timestamp of the trade execution.
+        volume (float): The volume of the executed trade.
+    """
+    event_type: EventType = EventType.EXECUTION
+    symbol: str
+    signal: SignalType # si es BUY, significa q hemos comprado, si es SELL, significa q hemos vendido
+    fill_price: float # el precio al que se ejecutó la orden, es decir, el precio al que se compró o vendió el activo. 
+    fill_time: datetime
+    volume: float # què cantidad hemos comprado o vendido.

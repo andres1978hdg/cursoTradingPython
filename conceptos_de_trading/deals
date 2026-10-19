@@ -1,0 +1,45 @@
+Deal : Es la ejecucion de una orden al server del broker (en mi caso pepperstone). Una vez que se ejecuta un deal tengo una posición.
+Deal in: solo tiene la inversion ya q aun no se cierra.
+Deal out: tiene la inversion mas la ganancia o la perdida ya que està cerrado. 
+
+En trading existen dos sistemas diferentes de gestionar las posiciones abiertas en un mismo instrumento financiero
+1.Netting (compensación) y 2.Hedging (cobertura). 
+En instructor lo llama "tipo de cuenta en metatrader 5"
+
+La diferencia principal radica en cómo trata tu cuenta las órdenes opuestas sobre el mismo activo.
+
+1. Netting (Sistema de Compensación).
+Es el modelo mas frecuente.
+Bajo un modelo de netting, todas las posiciones abiertas en un mismo instrumento se fusionan en una única posición neta.
+
+Cómo funciona: Si abres una operación y luego abres otra en sentido contrario sobre el mismo activo, el bróker no mantiene ambas abiertas de forma independiente. En su lugar, calcula la diferencia (el saldo neto).
+
+Ejemplo práctico:
+
+Compras (Long) 1 lote de EUR/USD. (este es el primer deal segun lo q explico el instructor)
+
+Más tarde, vendes (Short) 0.4 lotes de EUR/USD. (este es el segundo deal segun lo q explico el instructor)
+
+Resultado: Tu posición final se convierte en una única compra neta de 0.6 lotes. Las órdenes anteriores desaparecen como tal y son reemplazadas por esta nueva cifra neta.
+Segun lo q explico el instructor los deals se suman en Netting.
+
+Cierre de posiciones: Para cerrar una posición, simplemente ejecutas una orden por el volumen contrario exacto.
+
+2. Hedging (Sistema de Cobertura)
+Bajo un modelo de hedging, se permite mantener simultáneamente posiciones compradoras y vendedoras sobre el mismo instrumento en una misma cuenta de operaciones.
+
+Cómo funciona: Las órdenes opuestas coexisten de manera independiente. Ninguna anula a la otra automáticamente.
+
+Ejemplo práctico:
+
+Compras (Long) 1 lote de EUR/USD.
+
+Más tarde, abres una venta (Short) de 1 lote de EUR/USD.
+
+Resultado: Ambas operaciones siguen abiertas en tu terminal. Tienes una pérdida o ganancia flotante congelada (el beneficio de una compensa exactamente la pérdida de la otra, menos el spread o comisión).
+
+Características:
+
+Flexibilidad estratégica: Permite proteger temporalmente una posición en momentos de alta volatilidad sin necesidad de liquidarla (por ejemplo, ante la publicación de noticias macroeconómicas importantes).
+
+
