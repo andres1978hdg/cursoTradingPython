@@ -10,6 +10,7 @@ from position_sizer.position_sizer import PositionSizer
 from position_sizer.properties.position_sizer_properties import MinSizingProps, FixedSizingProps, RiskPctSizingProps
 from risk_manager.risk_manager import RiskManager
 from risk_manager.properties.risk_manager_properties import MaxLeverageFactorRiskProps
+from order_executor.order_executor import OrderExecutor
 
 
 if __name__ == "__main__":
@@ -38,19 +39,23 @@ if __name__ == "__main__":
 
     POSITION_SIZER = PositionSizer(events_queue=events_queue,
                                     data_provider=DATA_PROVIDER,
-                                    sizing_properties=FixedSizingProps(volume=0.09))
+                                    sizing_properties=FixedSizingProps(volume=1.00))
 
     RISK_MANAGER = RiskManager(events_queue=events_queue,
                                 data_provider=DATA_PROVIDER,
                                 portfolio=PORTFOLIO,
                                 risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5.0))
+
+    ORDER_EXECUTOR = OrderExecutor(events_queue=events_queue,
+                                    portfolio=PORTFOLIO)
     
     # Creación del trading director y ejecución del método principal
     TRADING_DIRECTOR = TradingDirector(events_queue=events_queue,
                                         data_provider=DATA_PROVIDER,
                                         signal_generator=SIGNAL_GENERATOR,   
                                         position_sizer=POSITION_SIZER,
-                                        risk_manager=RISK_MANAGER)
+                                        risk_manager=RISK_MANAGER,
+                                        order_executor=ORDER_EXECUTOR)
     
     TRADING_DIRECTOR.execute()
    

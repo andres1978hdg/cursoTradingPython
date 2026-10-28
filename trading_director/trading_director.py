@@ -5,14 +5,14 @@ from risk_manager.risk_manager import RiskManager
 import queue
 import time
 from typing import Dict, Callable
-
-from events.events import DataEvent, OrderEvent, SignalEvent, SizingEvent
+from order_executor.order_executor import OrderExecutor
+from events.events import DataEvent, OrderEvent, SignalEvent, SizingEvent, ExecutionEvent, PlacedPendingOrderEvent
 
 
 class TradingDirector():
     
     def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator, 
-                 position_sizer: PositionSizer, risk_manager: RiskManager):
+                 position_sizer: PositionSizer, risk_manager: RiskManager, order_executor: OrderExecutor):
         """
         Initializes the TradingDirector object.
 
@@ -36,6 +36,8 @@ class TradingDirector():
 
         self.RISK_MANAGER = risk_manager
 
+        self.ORDER_EXECUTOR = order_executor
+
 
          # Controlador de trading
         self.continue_trading: bool = True
@@ -45,7 +47,9 @@ class TradingDirector():
             "DATA": self._handle_data_event,
             "SIGNAL": self._handle_signal_event,
             "SIZING": self._handle_sizing_event,
-            "ORDER": self._handle_order_event
+            "ORDER": self._handle_order_event,
+            "EXECUTION": self._handle_execution_event,
+            "PENDING": self._handle_pending_order_event
         }
 
     # aca consumimos el evento de tipo DataEvent, y generamos un evento de tipo SignalEvent, que se colocará en la cola de eventos para ser procesado por el resto del sistema
@@ -104,7 +108,45 @@ class TradingDirector():
             None
         """
         print(f" Recibido ORDER EVENT con volumen {event.volume} para {event.signal} en {event.symbol}")
-        #self.ORDER_EXECUTOR.execute_order(event)
+        self.ORDER_EXECUTOR.execute_order(event)
+
+    def _handle_execution_event(self, event: ExecutionEvent):
+        """
+        Handle the execution event.
+
+        Args:
+            event (ExecutionEvent): The execution event object.
+
+        Returns:
+            None
+        """
+        print(f" Recibido EXECUTION EVENT {event.signal} en {event.symbol} con volumen {event.volume} al precio {event.fill_price}")
+        self._process_execution_or_pending_events(event)
+
+    def _handle_pending_order_event(self, event: PlacedPendingOrderEvent):
+        """
+        Handle the pending order event.
+
+        Args:
+            event (PlacedPendingOrderEvent): The pending order event object.
+
+        Returns:
+            None
+        """
+        print(f" Recibido PLACED PENDING ORDER EVENT con volumen {event.volume} para {event.signal} {event.target_order} en {event.symbol} al precio {event.target_price}")
+        self._process_execution_or_pending_events(event)
+
+    def _process_execution_or_pending_events(self, event: ExecutionEvent | PlacedPendingOrderEvent):    # Utilizar el | es para python 3.10 o superior
+        """
+        Process the execution or pending events.
+
+        Args:
+            event (ExecutionEvent | PlacedPendingOrderEvent): The event to be processed.
+
+        Returns:
+            None
+        """
+        pass
 
     def execute(self) -> None:
         """

@@ -62,8 +62,8 @@ class OrderType(str, Enum):
     Represents the type of an order.
     """
     MARKET = "MARKET" #orden de mercado, es decir, se ejecuta al precio actual del mercado
-    LIMIT = "LIMIT" #orden limitada, es decir, se ejecuta a un precio determinado o mejor (por ejemplo, si queremos comprar EURUSD a 1.1000, ponemos una orden limitada a 1.1000 y si el precio baja a 1.1000 o menos, se ejecuta la orden). Me imagino que esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
-    STOP = "STOP" #orden stop, es decir, se ejecuta a un precio determinado o peor (por ejemplo, si queremos vender EURUSD a 1.1000, ponemos una orden stop a 1.1000 y si el precio sube a 1.1000 o más, se ejecuta la orden). Me imagino que esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
+    LIMIT = "LIMIT" #orden limitada, es decir, se ejecuta a un precio determinado o mejor (por ejemplo, si queremos comprar EURUSD a 1.1000, ponemos una orden limitada a 1.1000 y si el precio baja a 1.1000 o menos, se ejecuta la orden). Esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
+    STOP = "STOP" #orden stop, es decir, se ejecuta a un precio determinado o peor (por ejemplo, si queremos vender EURUSD a 1.1000, ponemos una orden stop a 1.1000 y si el precio sube a 1.1000 o más, se ejecuta la orden). Esto es para una estrategia no de mercado, sino "pending", es decir para ejecuciones a futuro.
 
 class BaseEvent(BaseModel):
     """
@@ -138,7 +138,7 @@ class SizingEvent(BaseEvent):
     tp: float
     volume: float
 
-class OrderEvent(BaseEvent):
+class OrderEvent(BaseEvent): # este es el evento que se genera cuando el risk manager dice q la orden puede ejecutarse, es decir, que cumple con las reglas de gestión de riesgo y por lo tanto se puede enviar al OrderExecutor para que la ejecute en la plataforma de trading.
     """
     Represents an order event.
 
@@ -163,7 +163,8 @@ class OrderEvent(BaseEvent):
     tp: float
     volume: float # va a ser 0 en el caso q el risk manager diga q el OrderEvent no procede.
 
-class ExecutionEvent(BaseEvent):
+# Este evento se genera cuando se ejecuta correctamente una orden de tipo MARKET, es decir, cuando el OrderExecutor ejecuta la orden en la plataforma de trading y se abre o cierra una posición en el mercado. Este evento es generado por el OrderExecutor y es consumido por el TradingDirector para actualizar el estado del portafolio y del riesgo. (Esto lo dijo el asistenete, no yo!!)
+class ExecutionEvent(BaseEvent): # este es el evento que se genera cuando el OrderExecutor ejecuta la orden en la plataforma de trading, es decir, cuando la orden se ha ejecutado correctamente y se ha abierto o cerrado una posición en el mercado.
     """
     Represents an execution event that occurs when a trade is executed.
 
@@ -181,3 +182,30 @@ class ExecutionEvent(BaseEvent):
     fill_price: float # el precio al que se ejecutó la orden, es decir, el precio al que se compró o vendió el activo. 
     fill_time: datetime
     volume: float # què cantidad hemos comprado o vendido.
+
+# PlacedPendingOrderEvent es diferente de ExecutionEvent, ya que este último es el que se genera cuando la orden se ha ejecutado correctamente y se ha abierto o cerrado una posición en el mercado, mientras que PlacedPendingOrderEvent es el que se genera cuando la orden pendiente ha sido colocada correctamente en la plataforma de trading, pero aún no se ha ejecutado.
+class PlacedPendingOrderEvent(BaseEvent): #creo PlacedPendingOrderEvent para diferenciarlo de OrderEvent, ya que este último es el que se genera desde la estrategia y el primero es el que se genera desde el OrderExecutor cuando la orden pendiente ha sido colocada correctamente.
+        
+    """
+    Represents an event for a placed pending order.
+
+    Attributes:
+        event_type (EventType): The type of the event (EventType.PENDING).
+        symbol (str): The symbol of the order.
+        signal (SignalType): The type of signal for the order.
+        target_order (OrderType): The type of order to be placed.
+        target_price (float): The target price for the order.
+        magic_number (int): The magic number associated with the order.
+        sl (float): The stop loss level for the order.
+        tp (float): The take profit level for the order.
+        volume (float): The volume of the order.
+    """
+    event_type: EventType = EventType.PENDING
+    symbol: str
+    signal: SignalType
+    target_order: OrderType
+    target_price: float
+    magic_number: int
+    sl: float
+    tp: float
+    volume: float
