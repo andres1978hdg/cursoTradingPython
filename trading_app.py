@@ -11,6 +11,7 @@ from position_sizer.properties.position_sizer_properties import MinSizingProps, 
 from risk_manager.risk_manager import RiskManager
 from risk_manager.properties.risk_manager_properties import MaxLeverageFactorRiskProps
 from order_executor.order_executor import OrderExecutor
+from notifications.notifications import NotificationService, TelegramNotificationProperties
 
 
 if __name__ == "__main__":
@@ -30,9 +31,13 @@ if __name__ == "__main__":
 
     PORTFOLIO = Portfolio(magic_number=magic_number)
 
+    ORDER_EXECUTOR = OrderExecutor(events_queue=events_queue,
+                                    portfolio=PORTFOLIO)
+
     SIGNAL_GENERATOR = SignalMACrossover(events_queue=events_queue,
                                         data_provider=DATA_PROVIDER,
                                         portfolio=PORTFOLIO,
+                                        order_executor=ORDER_EXECUTOR,
                                         timeframe=timeframe,
                                         fast_period=fast_ma_period,
                                         slow_period=slow_ma_period)
@@ -46,8 +51,13 @@ if __name__ == "__main__":
                                 portfolio=PORTFOLIO,
                                 risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5.0))
 
-    ORDER_EXECUTOR = OrderExecutor(events_queue=events_queue,
-                                    portfolio=PORTFOLIO)
+    NOTIFICATIONS = NotificationService(
+        properties=TelegramNotificationProperties(
+            token="9153364338:AAEJZ7jat2aLGEYoX1P9PnCDBsSy8KHJuPA",
+            chat_id="9297340405",
+        )
+    )
+
     
     # Creación del trading director y ejecución del método principal
     TRADING_DIRECTOR = TradingDirector(events_queue=events_queue,
@@ -55,7 +65,8 @@ if __name__ == "__main__":
                                         signal_generator=SIGNAL_GENERATOR,   
                                         position_sizer=POSITION_SIZER,
                                         risk_manager=RISK_MANAGER,
-                                        order_executor=ORDER_EXECUTOR)
+                                        order_executor=ORDER_EXECUTOR,
+                                        notification_service=NOTIFICATIONS)
     
     TRADING_DIRECTOR.execute()
    

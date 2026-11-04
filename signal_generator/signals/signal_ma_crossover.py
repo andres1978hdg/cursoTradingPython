@@ -3,13 +3,15 @@ from events.events import DataEvent, SignalEvent
 from portfolio.portfolio import Portfolio
 from ..interfaces.signal_generator_interface import ISignalGenerator
 from queue import Queue
+from order_executor.order_executor import OrderExecutor
 
 class SignalMACrossover(ISignalGenerator):
 
-    def __init__(self, events_queue: Queue, data_provider: DataProvider, portfolio: Portfolio, timeframe: str, fast_period: int, slow_period: int):
+    def __init__(self, events_queue: Queue, data_provider: DataProvider, portfolio: Portfolio, order_executor: OrderExecutor, timeframe: str, fast_period: int, slow_period: int):
        self.events_queue = events_queue
        self.data_provider = data_provider   
        self.PORTFOLIO = portfolio
+       self.ORDER_EXECUTOR=order_executor
        self.timeframe = timeframe
        self.fast_period = fast_period if fast_period > 1 else 2 # Aseguramos que el periodo rápido sea al menos 2
        self.slow_period = slow_period if slow_period >2 else 3 # Aseguramos que el periodo lento sea al menos 3, y mayor que el periodo rápido
@@ -48,10 +50,15 @@ class SignalMACrossover(ISignalGenerator):
         #Detectar una señal de compra. Compro justo poco despues del cruce. Compro caro para vender mas caro.
         #Lo de open_positions['LONG'] == 0 es para verificar si no hay posisiones ya abiertas de compra, lo que significa que ya estamos comprando y por lo tanto no es necesario emitir una nueva señal de compra
         if open_positions['LONG'] == 0 and fast_ma >slow_ma: #esto significa que la media movil rapida esta por encima de la media movil lenta, lo que indica de alta demanda de mercado, por lo tanto se genera una señal de compra. Esto significa que yo como trader, estoy dispuesto a comprar el activo a un precio más alto que el precio actual del mercado, lo que indica que espero que el precio siga subiendo. En otras palabras, estoy dispuesto a pagar más por el activo porque creo que su valor aumentará en el futuro.
-            signal = "BUY"
+           if open_positions['SHORT'] > 0:
+             # Tenemos señal de compra, pero tenemos posición de venta. Debemos cerrar la venta ANTES de abrir la compra.
+                self.ORDER_EXECUTOR.close_strategy_short_positions_by_symbol(symbol)
+           signal = "BUY"
 
         #Detectar una señal de venta. Vendo justo poco despues del cruce. Vendo barato para no quedarme y despues tener que vender mas barato aun.
         elif open_positions['SHORT'] == 0 and fast_ma < slow_ma: #esto significa que la media movil rapida esta por debajo de la media movil lenta, lo que indica de baja demanda de mercado, por lo tanto se genera una señal de venta. Esto significa que yo como trader, estoy dispuesto a vender el activo a un precio más bajo que el precio actual del mercado, lo que indica que espero que el precio siga bajando. En otras palabras, estoy dispuesto a vender el activo a un precio más bajo porque creo que su valor disminuirá en el futuro.
+            if open_positions['LONG'] > 0:
+                self.ORDER_EXECUTOR.close_strategy_long_positions_by_symbol(symbol)
             signal = "SELL"
 
         else:

@@ -6,13 +6,14 @@ import queue
 import time
 from typing import Dict, Callable
 from order_executor.order_executor import OrderExecutor
+from notifications.notifications import NotificationService
 from events.events import DataEvent, OrderEvent, SignalEvent, SizingEvent, ExecutionEvent, PlacedPendingOrderEvent
 
 
 class TradingDirector():
     
     def __init__(self, events_queue: queue.Queue, data_provider: DataProvider,  signal_generator: ISignalGenerator, 
-                 position_sizer: PositionSizer, risk_manager: RiskManager, order_executor: OrderExecutor):
+                 position_sizer: PositionSizer, risk_manager: RiskManager, order_executor: OrderExecutor, notification_service: NotificationService):
         """
         Initializes the TradingDirector object.
 
@@ -37,6 +38,8 @@ class TradingDirector():
         self.RISK_MANAGER = risk_manager
 
         self.ORDER_EXECUTOR = order_executor
+
+        self.NOTIFICATIONS = notification_service
 
 
          # Controlador de trading
@@ -146,7 +149,13 @@ class TradingDirector():
         Returns:
             None
         """
-        pass
+        if isinstance(event, ExecutionEvent):
+            self.NOTIFICATIONS.send_notification(title="MARKET ORDER", message=f"Ejecutada MARKET ORDER {event.signal} en {event.symbol} con volumen {event.volume} al precio {event.fill_price}")
+        elif isinstance(event, PlacedPendingOrderEvent):
+            self.NOTIFICATIONS.send_notification(title="PENDING PLACED", message=f"Colocada PENDING ORDER con volumen {event.volume} para {event.signal} {event.target_order} en {event.symbol} al precio {event.target_price}")
+        else:
+            pass
+
 
     def execute(self) -> None:
         """
