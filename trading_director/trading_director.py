@@ -150,9 +150,9 @@ class TradingDirector():
             None
         """
         if isinstance(event, ExecutionEvent):
-            self.NOTIFICATIONS.send_notification(title="MARKET ORDER", message=f"Ejecutada MARKET ORDER {event.signal} en {event.symbol} con volumen {event.volume} al precio {event.fill_price}")
+            self.NOTIFICATIONS.send_notification(title=f"{event.symbol} - MARKET ORDER", message=f"- Ejecutada MARKET ORDER {event.signal} en {event.symbol} con volumen {event.volume} al precio {event.fill_price}")
         elif isinstance(event, PlacedPendingOrderEvent):
-            self.NOTIFICATIONS.send_notification(title="PENDING PLACED", message=f"Colocada PENDING ORDER con volumen {event.volume} para {event.signal} {event.target_order} en {event.symbol} al precio {event.target_price}")
+            self.NOTIFICATIONS.send_notification(title=f"{event.symbol} - PENDING PLACED", message=f"- Colocada PENDING ORDER con volumen {event.volume} para {event.signal} {event.target_order} en {event.symbol} al precio {event.target_price}")
         else:
             pass
 
