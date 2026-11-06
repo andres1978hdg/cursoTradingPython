@@ -16,7 +16,7 @@ from notifications.notifications import NotificationService, TelegramNotificatio
 
 if __name__ == "__main__":
         # Definición de variables necesarias para la estrategia
-    symbols = ['EURUSD']#['EURUSD', 'USDCLP'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
+    symbols = ['EURUSD', 'USDCLP'] #['EURUSD'] #un simbolo en mt5 es un par de divisas, por ejemplo EURUSD, USDJPY, GBPUSD, USDCLP del MarketWatch (la ventana q se ve en la plataforma de mt5 donde estan todos los simbolos que podemos tradear y q se activa con ctrl +M)
     timeframe = '1min' #el timeframe de las velas que queremos recuperar, en este caso 1min, es decir, cada vela representa 1 minuto
     magic_number=12345 # el numero q le pasamos al bot en pepperstone.
     slow_ma_period = 20 #periodo de la media movil lenta, es decir, el numero de velas que se van a promediar para calcular la media movil lenta
@@ -49,12 +49,12 @@ if __name__ == "__main__":
     RISK_MANAGER = RiskManager(events_queue=events_queue,
                                 data_provider=DATA_PROVIDER,
                                 portfolio=PORTFOLIO,
-                                risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5.0))
+                                risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5))
 
     NOTIFICATIONS = NotificationService(
         properties=TelegramNotificationProperties(
-            token="9153364338:AAEJZ7jat2aLGEYoX1P9PnCDBsSy8KHJuPA",
-            chat_id="9297340405",
+            token="",
+            chat_id="",
         )
     )
 
