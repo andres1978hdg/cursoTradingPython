@@ -5,7 +5,8 @@ from data_provider.data_provider import DataProvider
 from queue import Queue
 from portfolio.portfolio import Portfolio
 from trading_director.trading_director import TradingDirector
-from signal_generator.signals.signal_ma_crossover import SignalMACrossover
+from signal_generator.signal_generator import SignalGenerator
+from signal_generator.properties.signal_generator_properties import MACrossoverProps
 from position_sizer.position_sizer import PositionSizer
 from position_sizer.properties.position_sizer_properties import MinSizingProps, FixedSizingProps, RiskPctSizingProps
 from risk_manager.risk_manager import RiskManager
@@ -34,13 +35,11 @@ if __name__ == "__main__":
     ORDER_EXECUTOR = OrderExecutor(events_queue=events_queue,
                                     portfolio=PORTFOLIO)
 
-    SIGNAL_GENERATOR = SignalMACrossover(events_queue=events_queue,
-                                        data_provider=DATA_PROVIDER,
-                                        portfolio=PORTFOLIO,
-                                        order_executor=ORDER_EXECUTOR,
-                                        timeframe=timeframe,
-                                        fast_period=fast_ma_period,
-                                        slow_period=slow_ma_period)
+    SIGNAL_GENERATOR = SignalGenerator(events_queue=events_queue,
+                                       data_provider=DATA_PROVIDER,
+                                       portfolio=PORTFOLIO,
+                                       order_executor=ORDER_EXECUTOR,
+                                       signal_properties=MACrossoverProps(timeframe=timeframe, fast_period=fast_ma_period, slow_period=slow_ma_period))
 
     POSITION_SIZER = PositionSizer(events_queue=events_queue,
                                     data_provider=DATA_PROVIDER,
@@ -51,13 +50,14 @@ if __name__ == "__main__":
                                 portfolio=PORTFOLIO,
                                 risk_properties=MaxLeverageFactorRiskProps(max_leverage_factor=5))
 
+    
     NOTIFICATIONS = NotificationService(
         properties=TelegramNotificationProperties(
             token="",
             chat_id="",
         )
     )
-
+    
     
     # Creación del trading director y ejecución del método principal
     TRADING_DIRECTOR = TradingDirector(events_queue=events_queue,
@@ -66,7 +66,8 @@ if __name__ == "__main__":
                                         position_sizer=POSITION_SIZER,
                                         risk_manager=RISK_MANAGER,
                                         order_executor=ORDER_EXECUTOR,
-                                        notification_service=NOTIFICATIONS)
+                                        notification_service=NOTIFICATIONS
+                                    )
     
     TRADING_DIRECTOR.execute()
    
